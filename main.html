@@ -1,0 +1,37 @@
+<html>
+	<head></head>
+	
+	<body>
+	  <canvas id="glCanvas" width="640" height="480"></canvas>
+	</body>
+
+</html>
+
+<script>
+
+Screen = function(){
+	this.canvas = null;
+	this.gl = null;
+	
+	Screen.prototype.Init = function(){
+		this.canvas = document.querySelector("#glCanvas");
+		this.gl = this.canvas.getContext("webgl");
+		
+		if (!this.gl) {
+			alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+			return;
+		}
+	};
+	
+	Screen.prototype.Render = function(){
+		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+	};
+}
+
+var screen = new Screen();
+screen.Init();
+screen.Render();
+
+
+</script>
