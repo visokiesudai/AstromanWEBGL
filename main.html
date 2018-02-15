@@ -9,11 +9,32 @@
 
 <script>
 
-Screen = function(){
-	this.canvas = null;
-	this.gl = null;
+class Rectangle {
 	
-	Screen.prototype.Init = function(){
+	constructor(x, y, width, height){
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	};
+	
+	Intersects(entity){
+		if(typeof(entity) == typeof(Rectangle)){
+			// Do rectangle collision checks
+		}
+	};
+	
+};
+
+class Screen {
+
+	constructor(){
+		this.canvas = null;
+		this.gl = null;
+	};
+	
+	Init()
+	{
 		this.canvas = document.querySelector("#glCanvas");
 		this.gl = this.canvas.getContext("webgl");
 		
@@ -21,17 +42,113 @@ Screen = function(){
 			alert("Unable to initialize WebGL. Your browser or machine may not support it.");
 			return;
 		}
+		
+		var positionBuffer = this.gl.createBuffer();
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
 	};
 	
-	Screen.prototype.Render = function(){
+	Render()
+	{
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 	};
-}
+};
+
+class EntityManager {
+	
+	constructor(){
+		this.entities = [];
+	};
+	
+	GetEntities(){
+		return this.entities;
+	};
+	
+	Add(entity)
+	{	
+		this.entities.push(entity);
+	};
+	
+	Remove(entity)
+	{
+		let index = this.entities.indexOf(entity);
+	
+		if (index > -1) {
+			this.entities.splice(index, 1);
+		}
+	};
+	
+	Tick()
+	{
+		this.entities.map(function(item, index){
+			item.Tick(em);
+		});
+	};
+
+	Render(screen)
+	{
+		let self = this;
+		this.entities.map(function(item, index){
+			item.Render(screen);
+		});
+	};
+};
+
+class Entity {
+	
+	constructor(collision_bounds) {
+		console.log("created entity");
+		this.collision_bounds = collision_bounds;
+	};
+	
+	Tick(em){};
+
+	Render(screen){};
+	
+};
+
+class Player extends Entity {
+
+	Tick(em)
+	{
+		let entities = em.GetEntities();
+		let self = this;
+		
+		this.entities.map(function(item, index){
+			if(item == self) continue;
+		
+			if(self.collision_bounds.Intersects(item.collision_bounds)){
+				// To-Do recalculate position
+			}
+		});
+	};
+
+	Render(screen)
+	{
+		var x1 = this.collision_bounds.x;
+		var x2 = this.collision_bounds.x + this.collision_bounds.width;
+		var y1 = this.collision_bounds.y;
+		var y2 = this.collision_bounds.y + this.collision_bounds.height;
+		
+		screen.gl.bufferData(screen.gl.ARRAY_BUFFER, new Float32Array([
+			x1, y1,
+			x2, y1,
+			x1, y2,
+			x1, y2,
+			x2, y1,
+			x2, y2,
+		]), screen.gl.STATIC_DRAW);
+	};
+
+};
 
 var screen = new Screen();
+var em = new EntityManager();
+em.Add(new Player(new Rectangle(20, 20, 100, 100)));
+
 screen.Init();
 screen.Render();
+em.Render(screen);
 
 
 </script>
